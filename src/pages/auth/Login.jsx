@@ -23,7 +23,7 @@ const Login = () => {
     e.preventDefault();
     const success = await login(email, password);
     if (success) {
-      const from = location.state?.from?.pathname || "/dashboard";
+      const from = location.state?.from?.pathname || "/products";
       navigate(from, { replace: true });
     } else {
       setError("Invalid admin credentials");

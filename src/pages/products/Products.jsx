@@ -24,9 +24,10 @@ import Layout from "../../components/layout/Layout";
 import axios from "axios";
 
 const Products = () => {
+  const [error, setError] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editProductId, setEditProductId] = useState(null);
-
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
@@ -39,21 +40,34 @@ const Products = () => {
   });
   const [image, setImage] = useState(null);
 
-  // Fetch products
+  // Fetch all products
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem("adminToken");
       const res = await axios.get(
         "http://localhost:4000/api/product/getAllProducts",
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       setProducts(res.data || []);
-    } catch (error) {
-      console.error("Error fetching products:", error);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    }
+  };
+
+  // Fetch filtered products
+  const filterProducts = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:4000/api/product/filterProduct",
+        {
+          params: { search, category: selectedCategory },
+        }
+      );
+      setProducts(res.data || []);
+    } catch (err) {
+      console.error("Error fetching products:", err);
     }
   };
 
@@ -64,15 +78,12 @@ const Products = () => {
       const res = await axios.get(
         "http://localhost:4000/api/category/getAllCategories",
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Category response:", res.data);
       setCategories(res.data || []);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
     }
   };
 
@@ -81,7 +92,10 @@ const Products = () => {
     fetchCategories();
   }, []);
 
-  // Delete handler
+  // Debounce search/filter for better performance
+  useEffect(() => {}, [search, selectedCategory]);
+
+  // Delete product
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this product?"
@@ -92,18 +106,15 @@ const Products = () => {
       const token = localStorage.getItem("adminToken");
       await axios.delete(
         `http://localhost:4000/api/product/deleteProduct/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchProducts();
-    } catch (error) {
-      console.error("Error deleting product:", error);
+    } catch (err) {
+      console.error("Error deleting product:", err);
     }
   };
 
+  // Edit product
   const handleEdit = (product) => {
     setEditMode(true);
     setEditProductId(product._id);
@@ -113,10 +124,11 @@ const Products = () => {
       price: product.price,
       categoryId: product.categoryId?._id || "",
     });
+    setImage(null);
     setOpenModal(true);
   };
 
-  // Submit Add Product
+  // Submit add/update product
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -132,58 +144,66 @@ const Products = () => {
         await axios.patch(
           `http://localhost:4000/api/product/updateProduct/${editProductId}`,
           data,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
         await axios.post("http://localhost:4000/api/product/addProduct", data, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
 
-      setFormData({ name: "", description: "", price: "", categoryId: "" });
-      setImage(null);
-      setOpenModal(false);
-      setEditMode(false);
-      setEditProductId(null);
+      handleCloseModal();
       fetchProducts();
-    } catch (error) {
-      console.error("Failed to submit product", error);
+    } catch (err) {
+      console.error("Failed to submit product", err);
+      setError(err.response?.data?.message || "Something went wrong");
     }
   };
 
+  // Close modal and reset form
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setFormData({ name: "", description: "", price: "", categoryId: "" });
+    setImage(null);
+    setEditMode(false);
+    setEditProductId(null);
+    setError("");
+  };
+
   const columns = [
-    { field: "_id", headerName: "ID", width: 220 },
     { field: "name", headerName: "Product Name", width: 200 },
     {
       field: "categoryId",
       headerName: "Category",
-      width: 130,
+      width: 150,
       renderCell: (params) => params.row.categoryId?.name || "N/A",
     },
     { field: "price", headerName: "Price", width: 100 },
-    { field: "stock", headerName: "Stock", width: 100 },
-    { field: "sales", headerName: "Sales", width: 100 },
+    {
+      field: "image",
+      headerName: "Image",
+      width: 120,
+      renderCell: (params) =>
+        params.value ? (
+          <img
+            src={`http://localhost:4000/uploads/${params.value}`}
+            alt="product"
+            style={{ width: 50, height: 50, objectFit: "cover" }}
+          />
+        ) : (
+          "No Image"
+        ),
+    },
     {
       field: "actions",
       headerName: "Actions",
-      type: "actions",
       width: 120,
-      sortable: false,
       renderCell: (params) => (
         <Box>
-          <IconButton color="primary" onClick={() => handleEdit(params.row)}>
+          <IconButton onClick={() => handleEdit(params.row)}>
             <EditIcon />
           </IconButton>
-          <IconButton
-            color="error"
-            onClick={() => handleDelete(params.row._id)}
-          >
+          <IconButton onClick={() => handleDelete(params.row._id)}>
             <DeleteIcon />
           </IconButton>
         </Box>
@@ -193,7 +213,7 @@ const Products = () => {
 
   return (
     <Layout>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 10 }}>
         <Typography variant="h4">Products</Typography>
         <Button
           variant="contained"
@@ -208,28 +228,42 @@ const Products = () => {
             setImage(null);
             setEditMode(false);
             setOpenModal(true);
-          }}
-        >
+          }}>
           Add Product
         </Button>
       </Box>
 
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+      <Paper sx={{ p: 2, m: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <TextField
             placeholder="Search products..."
             variant="outlined"
             size="small"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            sx={{ flexGrow: 1, mr: 2 }}
+            sx={{ flexGrow: 1 }}
             InputProps={{
               startAdornment: (
                 <SearchIcon sx={{ mr: 1, color: "action.active" }} />
               ),
             }}
           />
-          <Button variant="outlined">Filter</Button>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <Select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              displayEmpty>
+              <MenuItem value="">All Categories</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem key={cat._id} value={cat._id}>
+                  {cat.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button variant="outlined" onClick={filterProducts}>
+            Filter
+          </Button>
         </Box>
       </Paper>
 
@@ -242,22 +276,25 @@ const Products = () => {
           rowsPerPageOptions={[5, 10, 20]}
           checkboxSelection
           disableSelectionOnClick
-          sx={{
-            "& .MuiDataGrid-cell": {
-              alignItems: "center",
-            },
-          }}
+          sx={{ "& .MuiDataGrid-cell": { alignItems: "center" } }}
         />
       </Paper>
 
-      {/* Add Product Modal */}
-      <Modal open={openModal} onClose={() => setOpenModal(false)}>
-        <Paper sx={{ width: 500, p: 4, mx: "auto", mt: 10, position: "relative" }}>
-          {/* Close (X) Button */}
+      {/* Add/Edit Product Modal */}
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <Paper
+          sx={{
+            width: 500,
+            p: 4,
+            mx: "auto",
+            mt: 10,
+            position: "relative",
+            maxHeight: "80vh",
+            overflowY: "auto",
+          }}>
           <IconButton
-            onClick={() => setOpenModal(false)}
-            sx={{ position: "absolute", top: 8, right: 8 }}
-          >
+            onClick={handleCloseModal}
+            sx={{ position: "absolute", top: 8, right: 8 }}>
             <CloseIcon />
           </IconButton>
 
@@ -297,7 +334,6 @@ const Products = () => {
               margin="normal"
               required
             />
-
             <FormControl fullWidth margin="normal" required>
               <InputLabel>Category</InputLabel>
               <Select
@@ -305,8 +341,7 @@ const Products = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, categoryId: e.target.value })
                 }
-                label="Category"
-              >
+                label="Category">
                 {categories.map((cat) => (
                   <MenuItem key={cat._id} value={cat._id}>
                     {cat.name}
@@ -330,6 +365,11 @@ const Products = () => {
               </Button>
             </Box>
           </form>
+          {error && (
+            <Typography color="error" mt={2}>
+              {error}
+            </Typography>
+          )}
         </Paper>
       </Modal>
     </Layout>

@@ -14,8 +14,6 @@ import {
 } from '@mui/material';
 import { 
   Menu as MenuIcon, 
-  Notifications as NotificationsIcon, 
-  Settings as SettingsIcon,
   Logout as LogoutIcon,
   AccountCircle as ProfileIcon,
   Person as UserIcon
@@ -61,27 +59,10 @@ const Topbar = ({ toggleSidebar }) => {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-          Cosmetic Store Admin
-        </Typography>
+            Admin Store
+         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {/* Notifications Button */}
-          <IconButton 
-            color="inherit"
-            onClick={() => handleNavigation('/notifications')}
-          >
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-
-          {/* Settings Button */}
-          <IconButton 
-            color="inherit" 
-            sx={{ ml: 1 }}
-            onClick={() => handleNavigation('/settings')}
-          >
-            <SettingsIcon />
-          </IconButton>
+        
 
           {/* User Avatar with Menu */}
           <IconButton onClick={handleMenuOpen} sx={{ ml: 2 }}>
@@ -127,18 +108,8 @@ const Topbar = ({ toggleSidebar }) => {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           >
-            <MenuItem onClick={() => handleNavigation('/profile')}>
-              <ListItemIcon>
-                <ProfileIcon fontSize="small" />
-              </ListItemIcon>
-              My Profile
-            </MenuItem>
-            <MenuItem onClick={() => handleNavigation('/account')}>
-              <ListItemIcon>
-                <UserIcon fontSize="small" />
-              </ListItemIcon>
-              Account Settings
-            </MenuItem>
+            
+            
             <Divider />
             <MenuItem onClick={handleLogout}>
               <ListItemIcon>

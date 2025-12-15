@@ -9,27 +9,13 @@ import {
   Toolbar,
   Box,
 } from "@mui/material";
-import {
-  Dashboard as DashboardIcon,
-  ShoppingCart as ProductsIcon,
-  People as CustomersIcon,
-  Receipt as OrdersIcon,
-  BarChart as AnalyticsIcon,
-  Settings as SettingsIcon,
-  Category as CategoryIcon,
-} from "@mui/icons-material";
+import { ShoppingCart as ProductsIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
 const menuItems = [
-  { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
-  { text: "Category", icon: <CategoryIcon />, path: "/category" },
   { text: "Products", icon: <ProductsIcon />, path: "/products" },
-  { text: "Customers", icon: <CustomersIcon />, path: "/customers" },
-  { text: "Orders", icon: <OrdersIcon />, path: "/orders" },
-  { text: "Analytics", icon: <AnalyticsIcon />, path: "/analytics" },
-  { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
 ];
 
 const Sidebar = ({ open, onClose }) => {
@@ -42,8 +28,7 @@ const Sidebar = ({ open, onClose }) => {
         width: drawerWidth,
         flexShrink: 0,
         [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
-      }}
-    >
+      }}>
       <Toolbar />
       <Box sx={{ overflow: "auto" }}>
         <List>
@@ -51,8 +36,7 @@ const Sidebar = ({ open, onClose }) => {
             <ListItem
               button
               key={item.text}
-              onClick={() => navigate(item.path)}
-            >
+              onClick={() => navigate(item.path)}>
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItem>

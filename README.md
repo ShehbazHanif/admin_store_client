@@ -1,4 +1,4 @@
-# 💄 Cosmetic Store Admin Dashboard
+#   Admin Store Dashboard
 
 An elegant and modern admin dashboard built with **React**, **Vite**, and **Material UI (MUI)**. Designed for managing products, customers, orders, and analytics in a cosmetic store.
 
@@ -6,21 +6,13 @@ An elegant and modern admin dashboard built with **React**, **Vite**, and **Mate
 
 ## 📸 Preview
 
-![Dashboard Preview](./screenshots/dashb.png)
-![Orders Preview](./screenshots/order.png)
-![product Preview](./screenshots/produc.png)
-![settings Preview](./screenshots/settings.png)
+
 
 ---
 
 ## 🚀 Features
 
 - 📦 Product Management
-- 👥 Customer Overview
-- 📊 Order Tracking
-- 📈 Sales & Revenue Stats
-- 🔔 Low Stock Alerts
-- 🏆 Top-Selling Products
 - 🗳️ Feedback Summary
 - 🔐 Protected Routes & Authentication
 - ⚡️ Vite for blazing fast development
@@ -45,7 +37,7 @@ src/
 ├── assets/ # Static assets
 ├── components/ # Reusable layout and route components
 ├── contexts/ # Global context (auth etc.)
-├── pages/ # Pages (Dashboard, Orders, Products, etc.)
+├── pages/ # Pages ( Products)
 ├── routes/ # Route definitions
 ├── App.jsx # Root app entry
 └── main.jsx # Vite + React entry point
@@ -58,6 +50,4 @@ src/
 ## 🧑‍💻 Getting Started
 
 1. **Clone the repo:**
-   ```bash
-   git clone https://github.com/HafizBasit7/Cosmetic_Store_Admin.git
-   cd Cosmetic_Store_Admin
+   
